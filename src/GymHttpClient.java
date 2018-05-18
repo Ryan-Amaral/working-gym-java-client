@@ -23,14 +23,12 @@ public class GymHttpClient {
 	
 	public Set<String> listEnvs(){
 		connect("/v1/envs/", "GET", null);
-		JSONObject json = getJson();
-        return json.getJSONObject("all_envs").keySet();
+		return getJson().getJSONObject("all_envs").keySet();
 	}
 	
 	public String createEnv(String envId) {
-		connect("/v1/envs/", "POST", "env_id=" + envId);
-		String instanceId = getData();
-		return instanceId;
+		connect("/v1/envs/", "POST", "{\"env_id\":\"" + envId + "\"}");
+		return getJson().getString("instance_id");
 	}
 	
 	// from: https://stackoverflow.com/questions/11901831/how-to-get-json-object-from-http-request-in-java
@@ -40,7 +38,6 @@ public class GymHttpClient {
 			Scanner scanner = new Scanner(con.getInputStream());
 			String response = scanner.useDelimiter("\\Z").next();
 			json = new JSONObject(response);
-			System.out.println(json);
 			scanner.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -48,21 +45,6 @@ public class GymHttpClient {
 		}
 		
 		return json;
-	}
-	
-	private String getData() {
-		String data = null;
-		try {
-			Scanner scanner = new Scanner(con.getInputStream());
-			data = scanner.useDelimiter("\\Z").next();
-			System.out.println(data);
-			scanner.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return data;
 	}
 
 	// https://www.mkyong.com/java/how-to-send-http-request-getpost-in-java/
@@ -77,6 +59,8 @@ public class GymHttpClient {
 				System.out.println("Response Code : " + responseCode);
 			}else { // post
 				con.setDoOutput(true);
+				con.setRequestProperty("Content-Type", "application/json");
+				con.setRequestProperty("Accept", "application/json");
 				DataOutputStream wr = new DataOutputStream(con.getOutputStream());
 				wr.writeBytes(args);
 				wr.flush();
