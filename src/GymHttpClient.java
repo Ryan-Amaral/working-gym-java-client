@@ -27,8 +27,88 @@ public class GymHttpClient {
 	}
 	
 	public String createEnv(String envId) {
-		connect("/v1/envs/", "POST", "{\"env_id\":\"" + envId + "\"}");
+		connect("/v1/envs/", 
+				"POST", 
+				"{\"env_id\":\"" + envId + "\"}");
 		return getJson().getString("instance_id");
+	}
+	
+	/**
+	 * Update to return Observation.
+	 * @param instanceId
+	 */
+	public void resetEnv(String instanceId) {
+		connect("/v1/envs/" + instanceId + "/reset/", 
+				"POST", 
+				"{\"instance_id\":\"" + instanceId + "\"}");
+		//return getJson().getSomething("observation");
+	}
+	
+	/**
+	 * Return info and stuff later.
+	 * @param instanceId
+	 */
+	public void stepEnv(String instanceId, double action, boolean isDiscreteSpace) {
+		if(isDiscreteSpace) {
+			connect("/v1/envs/" + instanceId + "/step/", 
+					"POST", 
+					"{\"instance_id\":\"" + instanceId + "\", \"action\":" + (int)action + "}");
+		}else {
+			connect("/v1/envs/" + instanceId + "/step/", 
+					"POST", 
+					"{\"instance_id\":\"" + instanceId + "\", \"action\":" + action + "}");
+		}
+		
+		// return stuff
+	}
+	
+	/**
+	 * return info later.
+	 * @param instanceId
+	 */
+	public void actionSpace(String instanceId) {
+		connect("/v1/envs/" + instanceId + "/action_space/", 
+				"GET", 
+				"{\"instance_id\":\"" + instanceId + "\"}");
+		//return info
+	}
+	
+	/**
+	 * return info later.
+	 * @param instanceId
+	 */
+	public void observationSpace(String instanceId) {
+		connect("/v1/envs/" + instanceId + "/observation_space/", 
+				"GET", 
+				"{\"instance_id\":\"" + instanceId + "\"}");
+		//return info
+	}
+	
+	public void startMonitor(String instanceId, boolean force, boolean resume) {
+		connect("/v1/envs/" + instanceId + "/monitor/start/", 
+				"POST", 
+				"{\"instance_id\":\"" + instanceId + "\", \"force\":" + Boolean.toString(force) + 
+				", \"resume\":" + Boolean.toString(resume) + "}");
+	}
+	
+	public void closeMonitor(String instanceId) {
+		connect("/v1/envs/" + instanceId + "/monitor/close/", 
+				"POST", 
+				"{\"instance_id\":\"" + instanceId + "\"}");
+	}
+	
+	public void flushMonitorToDisk(String trainingDir, String apiKey, String algId) {
+		connect("/v1/upload/", 
+				"POST", 
+				"{\"training_dir\":\"" + trainingDir + "\"," +
+				"\"api_key\":\"" + apiKey + "\"," +
+				"\"algorithm_id\":\"" + algId + "\"}");
+	}
+	
+	public void shutdownServer() {
+		connect("/v1/shutdown/", 
+				"POST", 
+				null);
 	}
 	
 	// from: https://stackoverflow.com/questions/11901831/how-to-get-json-object-from-http-request-in-java
