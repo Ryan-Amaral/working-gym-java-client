@@ -1,23 +1,21 @@
+package javaclient;
 
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 import java.util.Set;
 import org.json.JSONObject;
 
 //much based on: https://www.mkyong.com/java/how-to-send-http-request-getpost-in-java/
-public class GymHttpClient {
+public class GymJavaHttpClient {
 	
 	private String baseUrl;
 	private HttpURLConnection con;
 	
-	public GymHttpClient(String url) {
+	public GymJavaHttpClient(String url) {
 		baseUrl = url;
 	}
 	
@@ -157,7 +155,7 @@ public class GymHttpClient {
 	}
 	
 	public static void main(String args[]) {
-		GymHttpClient clnt = new GymHttpClient("http://127.0.0.1:5000");
+		GymJavaHttpClient clnt = new GymJavaHttpClient("http://127.0.0.1:5000");
 		System.out.println(clnt.createEnv("CartPole-v0"));
 		System.out.println(clnt.listEnvs().toString());
 	}
