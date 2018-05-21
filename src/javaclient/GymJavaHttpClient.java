@@ -69,20 +69,23 @@ public class GymJavaHttpClient {
      * @param instanceId The id of the environment.
      * @param action The action to do in the step.
      * @param isDiscreteSpace Whether space in the environment is discrete or not.
-     * @return stuff
+     * @return A StepObject, check out that class.
      */
-    public void stepEnv(String instanceId, double action, boolean isDiscreteSpace, boolean render) {
+    public StepObject stepEnv(String instanceId, double action, boolean isDiscreteSpace, boolean render) {
         if (isDiscreteSpace) {
-        	stepConnect("/v1/envs/" + instanceId + "/step/", "POST",
+        	connect("/v1/envs/" + instanceId + "/step/", "POST",
                     "{\"instance_id\":\"" + instanceId + "\", \"action\":" + (int) action + 
                     ", \"render\":" + Boolean.toString(render) + "}");
         } else {
-            stepConnect("/v1/envs/" + instanceId + "/step/", "POST",
+            connect("/v1/envs/" + instanceId + "/step/", "POST",
                     "{\"instance_id\":\"" + instanceId + "\", \"action\":" + action + 
                     ", \"render\":" + Boolean.toString(render) + "}");
         }
-        System.out.println(getJson().getDouble("reward"));
-        // return stuff
+        JSONObject jobj = getJson();
+        
+        return new StepObject(
+        		jobj.get("observation"), jobj.getFloat("reward"), 
+        		jobj.getBoolean("done"), jobj.get("info"));
     }
 
     /**
@@ -177,6 +180,28 @@ public class GymJavaHttpClient {
             URL url = new URL(baseUrl + urlEx);
             con = (HttpURLConnection) (url).openConnection();
             con.setRequestMethod(mthd);
+            if (mthd.equals("POST")) {
+                con.setDoOutput(true);
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("Accept", "application/json");
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.writeBytes(args);
+                wr.flush();
+                wr.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Same as connect method but with prints for debugging. 
+     */
+    private void connectDebug(String urlEx, String mthd, String args) {
+        try {
+            URL url = new URL(baseUrl + urlEx);
+            con = (HttpURLConnection) (url).openConnection();
+            con.setRequestMethod(mthd);
             if (mthd.equals("GET")) {
                 int responseCode = con.getResponseCode();
                 System.out.println("\nSending 'GET' request to URL : " + url);
@@ -199,44 +224,20 @@ public class GymJavaHttpClient {
             e.printStackTrace();
         }
     }
-    
-    /**
-     * Same as connect method but without pronts for efficiency. 
-     */
-    private void stepConnect(String urlEx, String mthd, String args) {
-        try {
-            URL url = new URL(baseUrl + urlEx);
-            con = (HttpURLConnection) (url).openConnection();
-            con.setRequestMethod(mthd);
-            if (mthd.equals("GET")) {
-                int responseCode = con.getResponseCode();
-            } else { // post
-                con.setDoOutput(true);
-                con.setRequestProperty("Content-Type", "application/json");
-                con.setRequestProperty("Accept", "application/json");
-                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-                wr.writeBytes(args);
-                wr.flush();
-                wr.close();
-
-                int responseCode = con.getResponseCode();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Test simple stuff out here.
      * @param args
      */
+    
     public static void main(String args[]) {
         GymJavaHttpClient clnt = new GymJavaHttpClient();
         String instId = clnt.createEnv("gvgai-aliens-lvl0-v0");
         clnt.listEnvs().toString();
         clnt.resetEnv(instId);
         for(int i = 0; i < 100; i++) {
-        	clnt.stepEnv(instId, 1, true, true);
+        	StepObject sobj = clnt.stepEnv(instId, 1, true, false);
+        	System.out.println(sobj.reward);
         }
     }
 
