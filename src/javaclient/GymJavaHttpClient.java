@@ -165,7 +165,6 @@ public class GymJavaHttpClient {
             json = new JSONObject(response);
             scanner.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -201,7 +200,8 @@ public class GymJavaHttpClient {
     /**
      * Same as connect method but with prints for debugging. 
      */
-    private void connectDebug(String urlEx, String mthd, String args) {
+    @SuppressWarnings("unused")
+	private void connectDebug(String urlEx, String mthd, String args) {
         try {
             URL url = new URL(baseUrl + urlEx);
             con = (HttpURLConnection) (url).openConnection();

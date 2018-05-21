@@ -19,4 +19,5 @@ public class StepObject {
 	public boolean done;
 	public Object info;
 
+	// a comment
 }
