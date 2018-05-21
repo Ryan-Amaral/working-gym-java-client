@@ -56,7 +56,7 @@ public class GymJavaHttpClient {
     /**
      * Resets the selected environment.
      * @param instanceId The id of the environment.
-     * @return Whatever the observation of the environment is.
+     * @return Whatever the observation of the environment is. Probably JSONArray.
      */
     public Object resetEnv(String instanceId) {
         connect("/v1/envs/" + instanceId + "/reset/", "POST", "{\"instance_id\":\"" + instanceId + "\"}");
@@ -90,7 +90,7 @@ public class GymJavaHttpClient {
     /**
      * Gets the name and the dimensions of the environment's action space.
      * @param instanceId The id of the environment.
-     * @return Whatever the action space of the environment is.
+     * @return Whatever the action space of the environment is. Probably JSONObject.
      */
     public Object actionSpace(String instanceId) {
         connect("/v1/envs/" + instanceId + "/action_space/", "GET", "{\"instance_id\":\"" + instanceId + "\"}");
