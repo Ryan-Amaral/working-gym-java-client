@@ -4,7 +4,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -57,7 +56,7 @@ public class GymJavaHttpClient {
     /**
      * Resets the selected environment.
      * @param instanceId The id of the environment.
-     * @return observation
+     * @return Whatever the observation of the environment is.
      */
     public Object resetEnv(String instanceId) {
         connect("/v1/envs/" + instanceId + "/reset/", "POST", "{\"instance_id\":\"" + instanceId + "\"}");
@@ -91,24 +90,26 @@ public class GymJavaHttpClient {
     /**
      * Gets the name and the dimensions of the environment's action space.
      * @param instanceId The id of the environment.
-     * @return info
+     * @return Whatever the action space of the environment is.
      */
-    public void actionSpace(String instanceId) {
+    public Object actionSpace(String instanceId) {
         connect("/v1/envs/" + instanceId + "/action_space/", "GET", "{\"instance_id\":\"" + instanceId + "\"}");
-        // return info
+        return getJson().get("info");
     }
 
     /**
+     * *** I COULDN'T ACTUALLY GET THIS ONE TO WORK, MAYBE MY TEST ENVIRONMENT DOESN'T USE THIS? ***
      * Gets the name and the dimensions of the environment's observation space.
      * @param instanceId The id of the environment.
-     * @return info
+     * @return Whatever the observation space of the environment is.
      */
     public void observationSpace(String instanceId) {
         connect("/v1/envs/" + instanceId + "/observation_space/", "GET", "{\"instance_id\":\"" + instanceId + "\"}");
-        // return info
+        System.out.println(getJson().toString());
     }
 
     /**
+     * *** DIDN'T TEST! ***
      * Start monitoring.
      * @param instanceId The id of the environment.
      * @param force Whether to clear existing training data.
@@ -120,6 +121,7 @@ public class GymJavaHttpClient {
     }
 
     /**
+     * *** DIDN'T TEST! ***
      * Flush all monitor data to disk.
      * @param instanceId The id of the environment.
      */
@@ -128,6 +130,7 @@ public class GymJavaHttpClient {
     }
 
     /**
+     * *** DIDN'T TEST! ***
      * Probably uploads your thing to OpenAI? The method just said "Flush all monitor data to disk"
      * on the Gym HTTP API GitHub page, but it seems to do something different, I'm new to gym so I
      * don't really know.
@@ -141,6 +144,7 @@ public class GymJavaHttpClient {
     }
 
     /**
+     * *** COULDN'T GET IT TO WORK! ***
      * Attempts to shutdown the server.
      */
     public void shutdownServer() {
@@ -232,12 +236,15 @@ public class GymJavaHttpClient {
     
     public static void main(String args[]) {
         GymJavaHttpClient clnt = new GymJavaHttpClient();
-        String instId = clnt.createEnv("gvgai-aliens-lvl0-v0");
+        String instId = clnt.createEnv("CartPole-v0");
         clnt.listEnvs().toString();
         clnt.resetEnv(instId);
-        for(int i = 0; i < 100; i++) {
-        	StepObject sobj = clnt.stepEnv(instId, 1, true, false);
-        	System.out.println(sobj.reward);
+        clnt.actionSpace(instId);
+        float rwdSum = 0;
+        for(int i = 0; i < 1000; i++) {
+        	StepObject sobj = clnt.stepEnv(instId, i%2, true, true);
+        	rwdSum += sobj.reward;
+        	System.out.println(rwdSum);
         }
     }
 
