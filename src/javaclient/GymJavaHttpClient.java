@@ -230,7 +230,7 @@ public class GymJavaHttpClient {
     }
 
     /**
-     * Test simple stuff out here.
+     * Test simple stuff out here by running this file.
      * @param args
      */
     
