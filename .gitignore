@@ -52,4 +52,5 @@ local.properties
 .scala_dependencies
 .worksheet
 
-src/javaclient/TpgAgentRunner.java
+src/agent/*
+!src/agent/SampleAgent.java
