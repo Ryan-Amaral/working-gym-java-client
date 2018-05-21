@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -58,9 +59,9 @@ public class GymJavaHttpClient {
      * @param instanceId The id of the environment.
      * @return observation
      */
-    public void resetEnv(String instanceId) {
+    public Object resetEnv(String instanceId) {
         connect("/v1/envs/" + instanceId + "/reset/", "POST", "{\"instance_id\":\"" + instanceId + "\"}");
-        // return getJson().getSomething("observation");
+        return getJson().get("observation"); // probably of type JSONArray
     }
 
     /**
@@ -70,15 +71,17 @@ public class GymJavaHttpClient {
      * @param isDiscreteSpace Whether space in the environment is discrete or not.
      * @return stuff
      */
-    public void stepEnv(String instanceId, double action, boolean isDiscreteSpace) {
+    public void stepEnv(String instanceId, double action, boolean isDiscreteSpace, boolean render) {
         if (isDiscreteSpace) {
-            connect("/v1/envs/" + instanceId + "/step/", "POST",
-                    "{\"instance_id\":\"" + instanceId + "\", \"action\":" + (int) action + "}");
+        	stepConnect("/v1/envs/" + instanceId + "/step/", "POST",
+                    "{\"instance_id\":\"" + instanceId + "\", \"action\":" + (int) action + 
+                    ", \"render\":" + Boolean.toString(render) + "}");
         } else {
-            connect("/v1/envs/" + instanceId + "/step/", "POST",
-                    "{\"instance_id\":\"" + instanceId + "\", \"action\":" + action + "}");
+            stepConnect("/v1/envs/" + instanceId + "/step/", "POST",
+                    "{\"instance_id\":\"" + instanceId + "\", \"action\":" + action + 
+                    ", \"render\":" + Boolean.toString(render) + "}");
         }
-
+        System.out.println(getJson().getDouble("reward"));
         // return stuff
     }
 
@@ -162,9 +165,9 @@ public class GymJavaHttpClient {
         return json;
     }
 
-    // https://www.mkyong.com/java/how-to-send-http-request-getpost-in-java/
     /**
-     * Does either a post or get request on the base url + urlEx.
+     * Does either a post or get request on the base url + urlEx. Learned from:
+     * https://www.mkyong.com/java/how-to-send-http-request-getpost-in-java/ .
      * @param urlEx The extension to add onto base url.
      * @param mthd POST or GET.
      * @param args What to pass for a Post request, make null if not used.
@@ -196,15 +199,45 @@ public class GymJavaHttpClient {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Same as connect method but without pronts for efficiency. 
+     */
+    private void stepConnect(String urlEx, String mthd, String args) {
+        try {
+            URL url = new URL(baseUrl + urlEx);
+            con = (HttpURLConnection) (url).openConnection();
+            con.setRequestMethod(mthd);
+            if (mthd.equals("GET")) {
+                int responseCode = con.getResponseCode();
+            } else { // post
+                con.setDoOutput(true);
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("Accept", "application/json");
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.writeBytes(args);
+                wr.flush();
+                wr.close();
+
+                int responseCode = con.getResponseCode();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Test simple stuff out here.
      * @param args
      */
     public static void main(String args[]) {
-        GymJavaHttpClient clnt = new GymJavaHttpClient("http://127.0.0.1:5000");
-        System.out.println(clnt.createEnv("gvgai-aliens-lvl0-v0"));
-        System.out.println(clnt.listEnvs().toString());
+        GymJavaHttpClient clnt = new GymJavaHttpClient();
+        String instId = clnt.createEnv("gvgai-aliens-lvl0-v0");
+        clnt.listEnvs().toString();
+        clnt.resetEnv(instId);
+        for(int i = 0; i < 100; i++) {
+        	clnt.stepEnv(instId, 1, true, true);
+        }
     }
 
 }
