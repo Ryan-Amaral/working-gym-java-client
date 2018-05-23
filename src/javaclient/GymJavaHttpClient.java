@@ -96,6 +96,24 @@ public class GymJavaHttpClient {
         connect("/v1/envs/" + instanceId + "/action_space/", "GET", "{\"instance_id\":\"" + instanceId + "\"}");
         return getJson().get("info");
     }
+    
+    /**
+     * Gets the dimension from the JSONObject obtained from actionSpace.
+     * @param jobj JSONObject from actionSpace.
+     * @return Whether the space is discrete.
+     */
+    public boolean isActionSpaceDiscrete(JSONObject jobj) {
+        String name = jobj.getString("name");
+        if(name.equals("Discrete")) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+    
+    public int actionSpaceSize(JSONObject jobj) {
+        return jobj.getInt("n");
+    }
 
     /**
      * *** I COULDN'T ACTUALLY GET THIS ONE TO WORK, MAYBE MY TEST ENVIRONMENT DOESN'T USE THIS? ***
