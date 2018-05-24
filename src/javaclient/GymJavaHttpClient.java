@@ -16,29 +16,14 @@ import org.json.*;
  */
 public class GymJavaHttpClient {
 
-    private String baseUrl; // probably "http://127.0.0.1:5000"
-    private HttpURLConnection con; // object to use to create and do stuff with connection
-
-    /**
-     * Creates a client with the default base url ("http://127.0.0.1:5000").
-     */
-    public GymJavaHttpClient() {
-    	this.baseUrl = "http://127.0.0.1:5000";
-    }
-    
-    /**
-     * Creates a client with selected baseUrl.
-     * @param baseUrl Ex: "http://127.0.0.1:5000"
-     */
-    public GymJavaHttpClient(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
+    public static String baseUrl = "http://127.0.0.1:5000"; // probably "http://127.0.0.1:5000"
+    private static HttpURLConnection con; // object to use to create and do stuff with connection
 
     /**
      * List all of the environments you started that are currently running on the server.
      * @return A set of the environments' instance Id's.
      */
-    public Set<String> listEnvs() {
+    public static Set<String> listEnvs() {
         connect("/v1/envs/", "GET", null);
         return getJson().getJSONObject("all_envs").keySet();
     }
@@ -48,7 +33,7 @@ public class GymJavaHttpClient {
      * @param envId The id of the environment to create (ex: "CartPole-v0").
      * @return The instance id of the created environment.
      */
-    public String createEnv(String envId) {
+    public static String createEnv(String envId) {
         connect("/v1/envs/", "POST", "{\"env_id\":\"" + envId + "\"}");
         return getJson().getString("instance_id");
     }
@@ -58,7 +43,7 @@ public class GymJavaHttpClient {
      * @param instanceId The id of the environment.
      * @return Whatever the observation of the environment is. Probably JSONArray.
      */
-    public Object resetEnv(String instanceId) {
+    public static Object resetEnv(String instanceId) {
         connect("/v1/envs/" + instanceId + "/reset/", "POST", "{\"instance_id\":\"" + instanceId + "\"}");
         return getJson().get("observation"); // probably of type JSONArray
     }
@@ -70,7 +55,7 @@ public class GymJavaHttpClient {
      * @param isDiscreteSpace Whether space in the environment is discrete or not.
      * @return A StepObject, check out that class.
      */
-    public StepObject stepEnv(String instanceId, double action, boolean isDiscreteSpace, boolean render) {
+    public static StepObject stepEnv(String instanceId, double action, boolean isDiscreteSpace, boolean render) {
         if (isDiscreteSpace) {
         	connect("/v1/envs/" + instanceId + "/step/", "POST",
                     "{\"instance_id\":\"" + instanceId + "\", \"action\":" + (int) action + 
@@ -92,7 +77,7 @@ public class GymJavaHttpClient {
      * @param instanceId The id of the environment.
      * @return Whatever the action space of the environment is. Probably JSONObject.
      */
-    public Object actionSpace(String instanceId) {
+    public static Object actionSpace(String instanceId) {
         connect("/v1/envs/" + instanceId + "/action_space/", "GET", "{\"instance_id\":\"" + instanceId + "\"}");
         return getJson().get("info");
     }
@@ -102,7 +87,7 @@ public class GymJavaHttpClient {
      * @param jobj JSONObject from actionSpace.
      * @return Whether the space is discrete.
      */
-    public boolean isActionSpaceDiscrete(JSONObject jobj) {
+    public static boolean isActionSpaceDiscrete(JSONObject jobj) {
         String name = jobj.getString("name");
         if(name.equals("Discrete")) {
             return true;
@@ -111,7 +96,12 @@ public class GymJavaHttpClient {
         }
     }
     
-    public int actionSpaceSize(JSONObject jobj) {
+    /**
+     * Gets the size of the action space (number of distinct actions).
+     * @param jobj JSONObject from actionSpace.
+     * @return Size of actionSpace.
+     */
+    public static int actionSpaceSize(JSONObject jobj) {
         return jobj.getInt("n");
     }
 
@@ -121,7 +111,7 @@ public class GymJavaHttpClient {
      * @param instanceId The id of the environment.
      * @return Whatever the observation space of the environment is.
      */
-    public void observationSpace(String instanceId) {
+    public static void observationSpace(String instanceId) {
         connect("/v1/envs/" + instanceId + "/observation_space/", "GET", "{\"instance_id\":\"" + instanceId + "\"}");
         System.out.println(getJson().toString());
     }
@@ -133,7 +123,7 @@ public class GymJavaHttpClient {
      * @param force Whether to clear existing training data.
      * @param resume Keep data that's already in.
      */
-    public void startMonitor(String instanceId, boolean force, boolean resume) {
+    public static void startMonitor(String instanceId, boolean force, boolean resume) {
         connect("/v1/envs/" + instanceId + "/monitor/start/", "POST", "{\"instance_id\":\"" + instanceId
                 + "\", \"force\":" + Boolean.toString(force) + ", \"resume\":" + Boolean.toString(resume) + "}");
     }
@@ -143,7 +133,7 @@ public class GymJavaHttpClient {
      * Flush all monitor data to disk.
      * @param instanceId The id of the environment.
      */
-    public void closeMonitor(String instanceId) {
+    public static void closeMonitor(String instanceId) {
         connect("/v1/envs/" + instanceId + "/monitor/close/", "POST", "{\"instance_id\":\"" + instanceId + "\"}");
     }
 
@@ -156,7 +146,7 @@ public class GymJavaHttpClient {
      * @param apiKey
      * @param algId
      */
-    public void upload(String trainingDir, String apiKey, String algId) {
+    public static void upload(String trainingDir, String apiKey, String algId) {
         connect("/v1/upload/", "POST", "{\"training_dir\":\"" + trainingDir + "\"," + "\"api_key\":\"" + apiKey + "\","
                 + "\"algorithm_id\":\"" + algId + "\"}");
     }
@@ -165,7 +155,7 @@ public class GymJavaHttpClient {
      * *** COULDN'T GET IT TO WORK! ***
      * Attempts to shutdown the server.
      */
-    public void shutdownServer() {
+    public static void shutdownServer() {
         connect("/v1/shutdown/", "POST", null);
     }
 
@@ -175,7 +165,7 @@ public class GymJavaHttpClient {
      * @return The JSON obtained from the connection, first line only, which should hopefully
      * contain all JSON.
      */
-    private JSONObject getJson() {
+    private static JSONObject getJson() {
         JSONObject json = null;
         try {
             Scanner scanner = new Scanner(con.getInputStream());
@@ -196,7 +186,7 @@ public class GymJavaHttpClient {
      * @param mthd POST or GET.
      * @param args What to pass for a Post request, make null if not used.
      */
-    private void connect(String urlEx, String mthd, String args) {
+    private static void connect(String urlEx, String mthd, String args) {
         try {
             URL url = new URL(baseUrl + urlEx);
             con = (HttpURLConnection) (url).openConnection();
@@ -219,7 +209,7 @@ public class GymJavaHttpClient {
      * Same as connect method but with prints for debugging. 
      */
     @SuppressWarnings("unused")
-	private void connectDebug(String urlEx, String mthd, String args) {
+	private static void connectDebug(String urlEx, String mthd, String args) {
         try {
             URL url = new URL(baseUrl + urlEx);
             con = (HttpURLConnection) (url).openConnection();
@@ -254,13 +244,13 @@ public class GymJavaHttpClient {
     
     public static void main(String args[]) {
         GymJavaHttpClient clnt = new GymJavaHttpClient();
-        String instId = clnt.createEnv("CartPole-v0");
-        clnt.listEnvs().toString();
-        clnt.resetEnv(instId);
-        clnt.actionSpace(instId);
+        String instId = GymJavaHttpClient.createEnv("CartPole-v0");
+        GymJavaHttpClient.listEnvs().toString();
+        GymJavaHttpClient.resetEnv(instId);
+        GymJavaHttpClient.actionSpace(instId);
         float rwdSum = 0;
         for(int i = 0; i < 1000; i++) {
-        	StepObject sobj = clnt.stepEnv(instId, i%2, true, true);
+        	StepObject sobj = GymJavaHttpClient.stepEnv(instId, i%2, true, true);
         	rwdSum += sobj.reward;
         	System.out.println(rwdSum);
         }
