@@ -236,24 +236,4 @@ public class GymJavaHttpClient {
             e.printStackTrace();
         }
     }
-
-    /**
-     * Test simple stuff out here by running this file.
-     * @param args
-     */
-    
-    public static void main(String args[]) {
-        GymJavaHttpClient clnt = new GymJavaHttpClient();
-        String instId = GymJavaHttpClient.createEnv("CartPole-v0");
-        GymJavaHttpClient.listEnvs().toString();
-        GymJavaHttpClient.resetEnv(instId);
-        GymJavaHttpClient.actionSpace(instId);
-        float rwdSum = 0;
-        for(int i = 0; i < 1000; i++) {
-        	StepObject sobj = GymJavaHttpClient.stepEnv(instId, i%2, true, true);
-        	rwdSum += sobj.reward;
-        	System.out.println(rwdSum);
-        }
-    }
-
 }
