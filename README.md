@@ -1,5 +1,5 @@
 # JAVA CLIENT for OPEN AI GYM HTTP SERVER
-A simple java client to access the OpenAI Gym HTTP Server. I tried looking for an existing java client, but the only one I found I couldn't get to work, so I decided to make one myself. 
+A simple java client to access the <a href="https://github.com/openai/gym-http-api">OpenAI Gym HTTP Server</a>. I tried looking for an existing java client, but the only one I found I couldn't get to work, so I decided to make one myself. 
 
 This project is primarily focussed on simplicity, so I minimized reliance on dependencies (only 1 for JSON (in addition to some standard Java libs)), and tried to keep the code itself easy to understand and modify.
 
