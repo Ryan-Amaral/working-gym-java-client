@@ -10,7 +10,7 @@ Install this JSON jar: <a>http://central.maven.org/maven2/org/json/json/20180130
 
 Add that JSON jar to the project as an external archive (Build Path / Add External Archives in Eclipse).
 
-See <a href="https://github.com/Ryan-Amaral/working-gym-java-client/blob/master/src/agent/SampleAgent.java">src/agent/SampleAgent.java</a> for an example (example is currently in development).
+See <a href="https://github.com/Ryan-Amaral/working-gym-java-client/blob/master/src/agent/SampleAgent.java">src/agent/SampleAgent.java</a> for an example.
 
 You may have to delete previous run configurations before running the first time (if applicable to your setup).
 
