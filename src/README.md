@@ -1,1 +1,0 @@
-# gvgai-tpg-agent
